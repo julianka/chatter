@@ -13,7 +13,9 @@
   [messages]
   (page/html5
    [:head
-    [:title "Chatter"]]
+    [:title "Chatter"]
+    (page/include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css")
+    (page/include-js "//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")]
    [:body
     [:h1 "Our Chat App"]
     message-form
@@ -21,8 +23,15 @@
 
 (defn message-table
   [messages]
-  [:table
-   (map (fn [m] [:tr [:td (:name m)] [:td (:message m)]]) messages)])
+  [:table#messages.table.table-striped
+   [:tr
+      [:th "Name"]
+      [:th "Message"]]
+   (map (fn [m]
+          [:tr
+           [:td (:name m)]
+           [:td (:message m)]])
+        messages)])
 
 (def message-form
   (form/form-to
