@@ -6,7 +6,7 @@
             [hiccup.page :as page]
             [hiccup.form :as form]))
 
-(declare message-form)
+(declare message-form message-table)
 
 (defn generate-message-view
   "This generates the HTML for displaying messages"
@@ -17,8 +17,12 @@
    [:body
     [:h1 "Our Chat App"]
     message-form
-    [:table
-        (map (fn [m] [:tr [:td (:name m)] [:td (:message m)]]) messages)]]))
+    (message-table messages)]))
+
+(defn message-table
+  [messages]
+  [:table
+   (map (fn [m] [:tr [:td (:name m)] [:td (:message m)]]) messages)])
 
 (def message-form
   (form/form-to
@@ -28,7 +32,7 @@
        (form/submit-button "Submit")))
 
 (def chat-messages
-    (atom '()))
+    (atom []))
 
 (defn update-messages!
   "This will update a message list atom"
@@ -41,8 +45,7 @@
         (let [name-param (get params "name")
               msg-param (get params "msg")
               new-messages (update-messages! chat-messages name-param msg-param)]
-        (generate-message-view new-messages)
-             ))
+          (generate-message-view new-messages)))
   (route/not-found "Not Found"))
 
 (def app (wrap-params app-routes))
