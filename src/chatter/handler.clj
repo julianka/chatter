@@ -1,13 +1,28 @@
 (ns chatter.handler
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
+            [environ.core :refer [env]]
             [garden.core :refer [css]]
             [hiccup.page :as page]
             [hiccup.form :as form]
+            [ring.adapter.jetty :as jetty]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-            [ring.middleware.params :refer [wrap-params]]))
+            [ring.middleware.params :refer [wrap-params]]
+            [ring.util.anti-forgery :as anti-forgery])
+  (:gen-class))
+
+(def styles
+  (css [:h1 {:text-align "center", :color "purple"}]
+       [:p {:font-family "Georgia", :color "#333"}
+          [:.special {:font-weight "bold"}]]))
 
 (declare message-form message-table)
+
+(defn init []
+  (println "Chatter is starting"))
+
+(defn destroy []
+  (println "Chatter is shutting down"))
 
 (defn generate-message-view
   "This generates the HTML for displaying messages"
@@ -53,11 +68,6 @@
   [messages name new-message]
   (swap! messages conj {:name name :message new-message}))
 
-(def styles
-  (css [:h1 {:text-align "center", :color "purple"}]
-       [:p {:font-family "Georgia", :color "#333"}
-          [:.special {:font-weight "bold"}]]))
-
 (defroutes app-routes
   (GET "/" [] (generate-message-view @chat-messages))
   (GET "/style.css" [] {:content-type "text/css" :body styles})
@@ -70,3 +80,7 @@
   (route/not-found "Not Found"))
 
 (def app (wrap-params app-routes))
+
+(defn -main [& [port]]
+  (let [port (Integer. (or port (env :port) 5000))]
+    (jetty/run-jetty #'app {:port port :join? false})))
